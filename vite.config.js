@@ -8,6 +8,7 @@ export default defineConfig({
       '/api': {
         target: 'https://api.favorit-parts.ru',
         changeOrigin: true,
+        followRedirects: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
