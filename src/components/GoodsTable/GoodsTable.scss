@@ -1,0 +1,27 @@
+.goods-table {
+  table-layout: fixed;
+  --bs-table-hover-bg: var(--bs-primary-bg-subtle);
+  --bs-table-hover-color: var(--bs-emphasis-color);
+
+  &__header {
+    &--number {
+      width: 18%;
+    }
+
+    &--name {
+      width: 45%;
+    }
+
+    &--brand {
+      width: 20%;
+    }
+
+    &--price {
+      width: 15%;
+    }
+
+    &--count {
+      width: 15%;
+    }
+  }
+}
