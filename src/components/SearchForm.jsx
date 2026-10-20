@@ -1,25 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { fetchBrands } from '../store/search/searchAction';
-import { debounce } from '../utils/debounce';
+import { useDebouncedCallback } from '../hooks/useDebouncedCallback';
 
 export default function SearchForm() {
   const [value, setValue] = useState('');
   const dispatch = useDispatch();
+  const requestRef = useRef(null);
 
-  const search = useMemo(
-    () => debounce((number) => dispatch(fetchBrands(number)), 400),
-    [dispatch]
-  );
+  const { call: search, cancel: cancelSearch } = useDebouncedCallback((number) => {
+    requestRef.current?.abort();
+    requestRef.current = dispatch(fetchBrands(number));
+  }, 400);
 
-  useEffect(() => () => search.cancel(), [search]);
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   const handleChange = (event) => {
     const number = event.target.value;
     setValue(number);
 
     if (!number.trim()) {
-      search.cancel();
+      cancelSearch();
+      requestRef.current?.abort();
       return;
     }
 
@@ -38,6 +40,9 @@ export default function SearchForm() {
         placeholder="Например: 0189"
         value={value}
         onChange={handleChange}
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
       />
     </div>
   );

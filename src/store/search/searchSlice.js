@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchBrands, fetchOffers } from './searchAction';
+import { isStaleBrands, isStaleOffers } from './searchGuards';
 
 const initialState = {
   number: '',
@@ -31,12 +32,14 @@ const searchSlice = createSlice({
         state.goods = [];
       })
       .addCase(fetchBrands.fulfilled, (state, action) => {
+        if (isStaleBrands(state, action)) return;
         state.loading = false;
         state.brands = action.payload;
       })
       .addCase(fetchBrands.rejected, (state, action) => {
+        if (isStaleBrands(state, action)) return;
         state.loading = false;
-        state.error = action.payload;
+        if (!action.meta.aborted) state.error = action.payload;
       })
       .addCase(fetchOffers.pending, (state, action) => {
         state.loading = true;
@@ -46,11 +49,14 @@ const searchSlice = createSlice({
         state.goods = [];
       })
       .addCase(fetchOffers.fulfilled, (state, action) => {
+        if (isStaleOffers(state, action)) return;
         state.loading = false;
         state.goods = action.payload;
       })
       .addCase(fetchOffers.rejected, (state, action) => {
+        if (isStaleOffers(state, action)) return;
         state.loading = false;
+        if (action.meta.aborted) return;
         state.error = action.payload;
         state.selectedBrand = null;
         state.goods = [];

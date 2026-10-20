@@ -1,2 +1,2 @@
-export const API_KEY = 'A1234567-ABCD-1234-ABCD-ABC123456789';
+export const API_KEY = import.meta.env.VITE_API_KEY;
 export const API_BASE = '/api/hs/hsprice/';

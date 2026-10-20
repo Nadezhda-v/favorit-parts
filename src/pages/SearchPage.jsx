@@ -7,7 +7,7 @@ import ErrorMessage from '../components/ErrorMessage';
 
 export default function SearchPage() {
   const { number, brands, selectedBrand, goods, loading, error } = useSelector(
-    (state) => state.search
+    (state) => state.search,
   );
 
   return (
@@ -17,7 +17,7 @@ export default function SearchPage() {
       {loading && <Loader />}
       {!loading && error && <ErrorMessage message={error} />}
       {!loading && selectedBrand && (
-        <ResultsTable number={number} brand={selectedBrand} goods={goods} />
+        <ResultsTable brand={selectedBrand} goods={goods} />
       )}
       {!loading && !selectedBrand && brands.length > 0 && (
         <BrandsList number={number} brands={brands} />

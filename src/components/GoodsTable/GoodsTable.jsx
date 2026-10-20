@@ -1,42 +1,64 @@
-import { buildRows, getCount, getPrice } from '../../utils/goods';
+import { useMemo, useState } from 'react';
+import { buildRows, sortRows } from './lib/goods';
+import { nextSort } from './lib/tableFormat';
 import { GOODS_TABLE_HEADERS } from './GoodsTable.constants';
+import { GoodsTableRow, GoodsTableHeaderCell } from './ui';
 import './GoodsTable.scss';
 
 export default function GoodsTable({ goods }) {
-  const rows = buildRows(goods);
+  const [sort, setSort] = useState({ field: null, direction: null });
+  const [onlyAnalogues, setOnlyAnalogues] = useState(false);
+
+  const rows = useMemo(() => {
+    const built = buildRows(goods);
+    return onlyAnalogues ? built.filter((row) => row.isAnalogue) : built;
+  }, [goods, onlyAnalogues]);
+
+  const sortedRows = useMemo(
+    () => (sort.field ? sortRows(rows, sort.field, sort.direction) : rows),
+    [rows, sort],
+  );
+
+  const handleSort = (field) => setSort((current) => nextSort(current, field));
 
   return (
-    <div className="table-responsive">
-      <table className="table table-sm table-striped table-hover align-middle goods-table mt-2">
-        <thead>
-          <tr>
-            {GOODS_TABLE_HEADERS.map((header) => (
-              <th
-                key={header.key}
-                className={`goods-table__header goods-table__header--${header.key}${
-                  header.align === 'end' ? ' text-end' : ''
-                }`}
-              >
-                {header.label}
-              </th>
+    <div className="goods-table-wrapper">
+      <div className="form-check goods-table__filter">
+        <input
+          id="only-analogues"
+          type="checkbox"
+          className="form-check-input"
+          checked={onlyAnalogues}
+          onChange={(event) => setOnlyAnalogues(event.target.checked)}
+        />
+        <label htmlFor="only-analogues" className="form-check-label">
+          Показать только аналоги
+        </label>
+      </div>
+      <div className="table-responsive">
+        <table className="table table-sm table-striped table-hover align-middle goods-table mt-2">
+          <thead>
+            <tr>
+              {GOODS_TABLE_HEADERS.map((header) => (
+                <GoodsTableHeaderCell
+                  key={header.key}
+                  header={header}
+                  sort={sort}
+                  onSort={handleSort}
+                />
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedRows.map((row, index) => (
+              <GoodsTableRow
+                key={`${row.good.number || 'row'}-${index}`}
+                good={row.good}
+              />
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, index) => {
-            const price = getPrice(row);
-            return (
-              <tr key={`${row.number || 'row'}-${index}`}>
-                <td>{row.number || '—'}</td>
-                <td>{row.name || '—'}</td>
-                <td>{row.brand || '—'}</td>
-                <td className="text-end">{price !== null ? `${price.toFixed(2)} ₽` : '—'}</td>
-                <td className="text-end">{getCount(row)}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
